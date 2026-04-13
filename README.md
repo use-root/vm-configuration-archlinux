@@ -1,54 +1,112 @@
-# Minimal Arch Linux Oracle Virtual Box ௹
+# Minimal Arch Linux on Oracle VirtualBox ௹
 
-This is my workflow for hacking, before I used `Kali-minimal` and if I would to say the differents are minimal. 
+This is my workflow for hacking. Previously, I used `Kali-minimal`, and honestly, the differences are minimal.
 
-### Minimal recomendations:
-```javaScript
-
-RAM(Base Memory):4gb
-Disk: 50GB
-Procesors:3
-Acceleration: Nested Paging, KVM Paravirtualization (If You in linux, you can use QEU + KVM Is 10x better).
-Video-memory: 75MB
+### Minimal recommendations:
+```javascript
+RAM (Base Memory): 4 GB
+Disk: 50 GB
+Processors: 3
+Acceleration: Nested Paging, KVM Paravirtualization (If you are on Linux, you can use QEMU + KVM — it is much better).
+Video Memory: 75 MB
 ```
 
+### Disk partitioning:
 
-### Make the particions: 
+I use the following structure:
 
-Ok I use the structure like:
+- `/boot` or `/boot/efi` (≤ 512 MB)
+- `/` (root) (30 GB)
+- `/home` (45 GB)
+- `swap` (4–8 GB depending on RAM)
 
-- '/boot' / '/boot/efi' (512MB<)
-- '/root ' (30gb)
-- '/home' (45gb)
-- 'swap' (5-4gb) (Depend of your Ram, but if you have 4 so put 8gb or 6gb).
+For Arch, I use `cfdisk` and select GPT. Even in a VM, GPT is more modern than DOS, but you can choose either.
 
-For arch I use: `cfdisk` and selected the GPT, I know I'm in vm but GPT is more actual that DOS, but you can choose what ever you want.
+After creating the partitions, format them:
 
-|hola|hola|
------------
-|jdkdk|kadsfasfd
+```bash
+mkfs.vfat -F 32 /dev/sda1   # EFI
+mkfs.ext4 /dev/sda2         # root
+mkfs.ext4 /dev/sda3         # home
+mkswap /dev/sda4
+swapon /dev/sda4
+```
 
+Partition layout:
 
+| Partition | Filesystem | Size  |
+|----------|-----------|------|
+| /boot    | FAT32 (EFI) | 512 MB |
+| /        | ext4      | 30 GB |
+| /home    | ext4      | 45 GB |
+| swap     | swap      | 4 GB  |
 
+### Mount partitions:
 
+```bash
+mkdir -p /mnt/{boot,home}
+mount /dev/sda2 /mnt
+mount /dev/sda1 /mnt/boot
+mount /dev/sda3 /mnt/home
 
-When run your VM, you need to activate de 3d-aceleration `(Is recommendable)` 
+pacstrap -K /mnt linux linux-firmware base base-devel grub efibootmgr wpa_supplicant networkmanager
+```
 
+### Package explanation:
 
+- **linux:** The Linux kernel.
+- **linux-firmware:** Firmware for GPU, network, sound, etc.
+- **networkmanager:** Manages network connections (Wi-Fi, Ethernet, VPN).
+- **wpa_supplicant:** Handles WPA/WPA2 Wi-Fi authentication.
+- **grub:** Bootloader that loads the kernel.
+- **efibootmgr:** Registers the boot entry in UEFI firmware.
+- **base / base-devel:** Essential tools (bash, grep, make, gcc, etc.), useful for building software and AUR.
 
+---
 
-#### Tiling Window Manager: **BSPWM + SXHKD**
+### FSTAB (important):
 
+`fstab` is a configuration file that tells the system **which partitions to mount automatically at boot and where**.
 
+You generate it with:
 
+```bash
+genfstab -U /mnt >> /mnt/etc/fstab
+```
 
-- Terminal: **Alacritty**
+What it does:
+- Detects your partitions
+- Uses UUIDs (safer than `/dev/sdX`)
+- Defines mount points (`/`, `/home`, `/boot`, etc.)
+
+Example:
+
+```bash
+UUID=xxxx-xxxx / ext4 defaults 0 1
+UUID=yyyy-yyyy /home ext4 defaults 0 2
+UUID=zzzz-zzzz /boot vfat defaults 0 2
+```
+
+Without `fstab`, your system will not know how to mount disks on boot.
+
+---
+
+### VirtualBox tip:
+
+Enable 3D acceleration (recommended).
+
+---
+
+### Tiling Window Manager:
+
+BSPWM + SXHKD
+
+- Terminal: Alacritty
 - Picom
-- Nvim 
-- Bat : alias cat
-- lsd : alias ls
-- powerlevel10k: zsh-sudo (Script)
-- shell: zsh
-- rofi: launcher
-- Uso de virtualboxguest: VBoxClient --clipboard
-
+- Neovim
+- bat (alias for cat)
+- lsd (alias for ls)
+- powerlevel10k (Zsh theme)
+- Shell: zsh
+- rofi (launcher)
+- VirtualBox Guest: VBoxClient --clipboard
