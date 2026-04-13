@@ -1,8 +1,12 @@
 # Basic configuration of my ARCHLINUX 🦽
 
-- Tiling Window Manage: **BSPWM + SXHKD**
+This is my workflow for hacking, before I used Kali-minimal with fancy things, but I always was satured and wit a butch of tools that never used.
+and I heard about `ArchLinux`, but I avoid to changed because I was confortable with Kali-minimal, I knew how to make `particions`, make the files `fstab` but
+
+
+#### Tiling Window Manage: **BSPWM + SXHKD**
+
 - Terminal: **Alacritty**
-- Polybar: **Minimal**
 - Picom
 - Nvim 
 - Bat : alias cat
