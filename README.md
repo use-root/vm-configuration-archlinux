@@ -115,7 +115,7 @@ Also here in this point we can put us hostname: `echo "Arch" > /etc/hostname`.
 
 And now we goint to install the grub: 
 
-bash```
+```bash
 
 grub-install --target=x84_64-efi --efi-directory=/boot --bootloader-id=Grub
 grub-mkconfig -O /boot/grub/grub.cfg
